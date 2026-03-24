@@ -16,34 +16,68 @@ model User {
   stores    Store[]  // Un usuario tiene muchas tiendas
   createdAt DateTime @default(now())
 }
-
 model Store {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   name          String
-  subdomain     String   @unique
+  subdomain     String    @unique
   ownerEmail    String
-  userId        String   // ID del dueño
-  user          User     @relation(fields: [userId], references: [id])
-  products      Product[] // <--- RELACIÓN: Una tienda tiene muchos productos
-  createdAt     DateTime @default(now())
+  // --- Branding & Config ---
+  logo          String?
+  primaryColor  String    @default("#2563eb")
+  secondaryColor String   @default("#0f172a")
+  templateId    String    @default("default") // Para cambiar entre diseños
+  // -------------------------
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  products      Product[]
+  categories    Category[]
+  variantTypes  VariantType[]
+  createdAt     DateTime  @default(now())
 }
 
-// 📦 NUEVO MODELO DE PRODUCTOS
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
+  products  Product[]
+}
+
 model Product {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
-  description  String?  @db.Text
+  description  String?
   price        Float
-  comparePrice Float?   // Precio tachado (oferta)
-  sku          String?  // Código de inventario
-  images       String[] // URLs de fotos
-  videoUrl     String?  // URL del video demostrativo
-  stock        Int      @default(0)
-  isActive     Boolean  @default(true)
-  
+  comparePrice Float?
+  sku          String?  
+  images       String[]
+  videoUrl     String?
+  stock        Int       @default(0)
+  // Relaciones
   storeId      String
-  store        Store    @relation(fields: [storeId], references: [id])
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  store        Store     @relation(fields: [storeId], references: [id])
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  variants     ProductVariant[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// Para que el usuario cree "Talle", "Color", "Material"
+model VariantType {
+  id        String   @id @default(uuid())
+  name      String   // Ej: "Color"
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  values    String[] // Ej: ["Rojo", "Azul"]
+}
+
+model ProductVariant {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  combination Json     // Ej: {"Color": "Rojo", "Talle": "XL"}
+  price       Float?   // Precio específico si cambia
+  stock       Int      @default(0)
 }
