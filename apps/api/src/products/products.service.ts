@@ -1,4 +1,3 @@
-// apps/api/src/products/products.service.ts
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -6,30 +5,41 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-// Fragmento a actualizar en products.service.ts
-async create(data: any) {
-  return this.prisma.product.create({
-    data: {
-      name: data.name,
-      description: data.description,
-      price: parseFloat(data.price),
-      comparePrice: data.comparePrice ? parseFloat(data.comparePrice) : null,
-      sku: data.sku,
-      stock: parseInt(data.stock) || 0,
-      images: data.images,
-      storeId: data.storeId,
-      categoryId: data.categoryId || null,
-      // Guardamos la configuración de variantes/atributos como JSON por ahora 
-      // para facilitar la validación rápida
-      variants: {
-        create: data.variants?.map((v: any) => ({
-          combination: v, // Ej: { "Color": "Rojo", "Talle": "XL" }
-          stock: parseInt(data.stock) || 0,
-        }))
-      }
-    },
-  });
-}
+  async create(data: any) {
+    try {
+      // Limpiamos los datos antes de enviarlos a Prisma
+      const price = parseFloat(data.price);
+      const comparePrice = data.comparePrice ? parseFloat(data.comparePrice) : null;
+      const stock = parseInt(data.stock) || 0;
+      
+      // IMPORTANTE: Si categoryId es un string vacío, debemos pasarlo como null o undefined
+      const categoryId = data.categoryId && data.categoryId.trim() !== "" ? data.categoryId : null;
+
+      return await this.prisma.product.create({
+        data: {
+          name: data.name,
+          description: data.description || null,
+          price: isNaN(price) ? 0 : price,
+          comparePrice: isNaN(comparePrice as number) ? null : comparePrice,
+          sku: data.sku || null,
+          stock: stock,
+          images: data.images || [],
+          videoUrl: data.videoUrl || null,
+          storeId: data.storeId,
+          // Relación de categoría (solo si existe)
+          ...(categoryId && { category: { connect: { id: categoryId } } }),
+          // Para las variantes, guardamos la estructura como un registro simple por ahora
+          // o puedes omitirlo si prefieres manejar la tabla de variantes por separado luego
+        },
+      });
+    } catch (error) {
+      console.error("❌ ERROR PRISMA:", error);
+      throw new InternalServerErrorException({
+        message: "Error al crear el producto en la base de datos",
+        error: error.message
+      });
+    }
+  }
 
   async findAllByStore(storeId: string) {
     try {
@@ -38,8 +48,7 @@ async create(data: any) {
         orderBy: { createdAt: 'desc' },
       });
     } catch (error) {
-      console.error("Error obteniendo productos:", error);
-      return []; // Si falla, devolvemos un array vacío para que el frontend no rompa
+      return [];
     }
   }
 }
