@@ -17,9 +17,13 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: 
 
   return (
     <>
-      <button onClick={() => setIsOpen(!isOpen)} className="fixed top-4 left-4 z-60 md:hidden bg-blue-600 p-2 rounded-lg text-white shadow-lg">
+// Solo el fragmento del botón en Sidebar.tsx
+        <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="fixed top-5 right-5 z-60 md:hidden bg-blue-600/80 backdrop-blur-md p-3 rounded-2xl text-white shadow-2xl border border-white/20"
+        >
         {isOpen ? <X size={24}/> : <Menu size={24}/>}
-      </button>
+        </button>
 
       <AnimatePresence>
         {isOpen && (
