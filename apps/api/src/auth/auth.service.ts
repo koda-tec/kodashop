@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -10,12 +10,19 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async register(email: string, pass: string) {
-    const hashedPassword = await bcrypt.hash(pass, 10);
-    return this.prisma.user.create({
-      data: { email, password: hashedPassword },
-    });
-  }
+async register(email: string, pass: string) {
+  const existingUser = await this.prisma.user.findUnique({ where: { email } });
+  if (existingUser) throw new ConflictException('Este correo ya está registrado');
+  
+  // Validación de seguridad mínima (puedes añadir más lógica aquí)
+  if (pass.length < 8) throw new BadRequestException('La contraseña debe tener al menos 8 caracteres');
+
+  const hashedPassword = await bcrypt.hash(pass, 10);
+  return this.prisma.user.create({
+    data: { email, password: hashedPassword },
+    select: { id: true, email: true, createdAt: true } // No devolver el hash de la contraseña
+  });
+}
 
   async login(email: string, pass: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
