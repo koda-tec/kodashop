@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Estilos base para el cuerpo de la aplicación */
+@layer base {
+  body {
+    @apply bg-slate-950 text-white min-h-screen;
+    background-image: radial-gradient(circle at top right, #0f172a, #020617);
+  }
+}
+
+/* Opcional: Para que los inputs se vean mejor por defecto */
+input {
+  @apply bg-slate-900 border-slate-700 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500;
+}
