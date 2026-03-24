@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Rocket, Mail, Lock, LogIn } from "lucide-react";
+import { Rocket, LogIn } from "lucide-react";
 
 // 1. Componente del Formulario (Separado para manejar el Suspense)
 function LoginForm() {
@@ -71,7 +71,6 @@ function LoginForm() {
       <form onSubmit={handleLogin} className="space-y-5">
         {/* Email Input */}
         <div className="relative flex items-center">
-          <Mail className="absolute left-5 text-slate-500 z-20 pointer-events-none" size={18} />
           <input 
             type="email" 
             placeholder="Correo electrónico" 
@@ -83,7 +82,6 @@ function LoginForm() {
 
         {/* Password Input */}
         <div className="relative flex items-center">
-          <Lock className="absolute left-5 text-slate-500 z-20 pointer-events-none" size={18} />
           <input 
             type="password" 
             placeholder="Contraseña" 

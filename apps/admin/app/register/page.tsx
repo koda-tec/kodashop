@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Rocket, ShieldCheck, Mail, Lock, ArrowRight } from "lucide-react";
+import { Rocket, ArrowRight } from "lucide-react";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ email: "", password: "", confirmPassword: "" });
@@ -73,7 +73,6 @@ export default function RegisterPage() {
 
           <form onSubmit={handleRegister} className="space-y-5">
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input 
                 type="email" placeholder="Correo electrónico" 
                 className="w-full bg-slate-950 border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all"
@@ -82,7 +81,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input 
                 type="password" placeholder="Contraseña (mín. 8 caracteres)" 
                 className="w-full bg-slate-950 border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all"
@@ -91,7 +89,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="relative">
-              <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input 
                 type="password" placeholder="Confirmar contraseña" 
                 className="w-full bg-slate-950 border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all"
