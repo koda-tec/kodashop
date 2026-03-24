@@ -1,8 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+
 
 export default function StoresPage() {
+   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("koda_token");
+    if (!token) {
+      router.push("/login");
+    }
+    fetchStores();
+  }, []);
   const [stores, setStores] = useState([]);
   const [name, setName] = useState("");
   const [subdomain, setSubdomain] = useState("");
