@@ -12,8 +12,8 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // Aquí guardaremos la contraseña encriptada
-  name      String?
+  password  String
+  stores    Store[]  // <--- Un usuario tiene muchas tiendas
   createdAt DateTime @default(now())
 }
 
@@ -22,5 +22,7 @@ model Store {
   name          String
   subdomain     String   @unique
   ownerEmail    String
+  userId        String   // <--- ID del dueño
+  user          User     @relation(fields: [userId], references: [id]) // <--- Relación real
   createdAt     DateTime @default(now())
 }
