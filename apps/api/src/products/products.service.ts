@@ -6,27 +6,30 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: any) {
-    try {
-      return await this.prisma.product.create({
-        data: {
-          name: data.name,
-          description: data.description,
-          price: parseFloat(data.price),
-          comparePrice: data.comparePrice ? parseFloat(data.comparePrice) : null,
-          sku: data.sku || null,
+// Fragmento a actualizar en products.service.ts
+async create(data: any) {
+  return this.prisma.product.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      price: parseFloat(data.price),
+      comparePrice: data.comparePrice ? parseFloat(data.comparePrice) : null,
+      sku: data.sku,
+      stock: parseInt(data.stock) || 0,
+      images: data.images,
+      storeId: data.storeId,
+      categoryId: data.categoryId || null,
+      // Guardamos la configuración de variantes/atributos como JSON por ahora 
+      // para facilitar la validación rápida
+      variants: {
+        create: data.variants?.map((v: any) => ({
+          combination: v, // Ej: { "Color": "Rojo", "Talle": "XL" }
           stock: parseInt(data.stock) || 0,
-          images: data.images || [],
-          videoUrl: data.videoUrl || null,
-          storeId: data.storeId,
-          categoryId: data.categoryId || null,
-        },
-      });
-    } catch (error) {
-      console.error("Error creando producto:", error);
-      throw new InternalServerErrorException("Error al guardar el producto");
-    }
-  }
+        }))
+      }
+    },
+  });
+}
 
   async findAllByStore(storeId: string) {
     try {
