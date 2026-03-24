@@ -1,0 +1,26 @@
+// apps/api/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Aquí guardaremos la contraseña encriptada
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model Store {
+  id            String   @id @default(uuid())
+  name          String
+  subdomain     String   @unique
+  ownerEmail    String
+  createdAt     DateTime @default(now())
+}
