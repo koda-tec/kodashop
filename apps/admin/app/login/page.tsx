@@ -53,44 +53,51 @@ function LoginForm() {
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[2.5rem] backdrop-blur-xl shadow-2xl">
-      {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl mb-6 text-center font-medium">{error}</div>}
-      {success && <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm p-3 rounded-xl mb-6 text-center font-medium">{success}</div>}
+<div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[2.5rem] backdrop-blur-xl shadow-2xl">
+  {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl mb-6 text-center font-medium">{error}</div>}
+  {success && <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm p-3 rounded-xl mb-6 text-center font-medium">{success}</div>}
 
-      <form onSubmit={handleLogin} className="space-y-5">
-        <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-          <input 
-            type="email" placeholder="Correo electrónico" 
-            className="w-full bg-slate-950 border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium"
-            required onChange={e => setEmail(e.target.value)}
-          />
-        </div>
-
-        <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-          <input 
-            type="password" placeholder="Contraseña" 
-            className="w-full bg-slate-950 border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium"
-            required onChange={e => setPassword(e.target.value)}
-          />
-        </div>
-
-        <button 
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
-        >
-          {loading ? "VERIFICANDO..." : "INICIAR SESIÓN"} <LogIn size={20} />
-        </button>
-      </form>
-
-      <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-        <p className="text-slate-500 text-sm font-medium">
-          ¿Aún no tienes cuenta?{" "}
-          <Link href="/register" className="text-blue-500 font-bold hover:underline">Regístrate gratis</Link>
-        </p>
-      </div>
+  <form onSubmit={handleLogin} className="space-y-5">
+    {/* Input Correo */}
+    <div className="relative flex items-center">
+      <Mail className="absolute left-4 text-slate-500 pointer-events-none" size={18} />
+      <input 
+        type="email" 
+        placeholder="Correo electrónico" 
+        className="w-full bg-slate-950 border border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium"
+        required 
+        onChange={e => setEmail(e.target.value)}
+      />
     </div>
+
+    {/* Input Contraseña */}
+    <div className="relative flex items-center">
+      <Lock className="absolute left-4 text-slate-500 pointer-events-none" size={18} />
+      <input 
+        type="password" 
+        placeholder="Contraseña" 
+        className="w-full bg-slate-950 border border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium"
+        required 
+        onChange={e => setPassword(e.target.value)}
+      />
+    </div>
+
+    <button 
+      disabled={loading}
+      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+    >
+      {loading ? "VERIFICANDO..." : "INICIAR SESIÓN"} <LogIn size={20} />
+    </button>
+  </form>
+
+  <div className="mt-8 pt-6 border-t border-slate-800 text-center">
+    <p className="text-slate-500 text-sm font-medium">
+      ¿Aún no tienes cuenta?{" "}
+      <Link href="/register" className="text-blue-500 font-bold hover:underline">Regístrate gratis</Link>
+    </p>
+  </div>
+</div>
+
   );
 }
 
