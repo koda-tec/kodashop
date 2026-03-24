@@ -164,7 +164,7 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="group bg-slate-900/30 border border-slate-800 p-6 rounded-[2rem] hover:border-blue-500/50 transition-all shadow-xl hover:shadow-blue-500/5"
+                    className="group bg-slate-900/30 border border-slate-800 p-6 rounded-4xl hover:border-blue-500/50 transition-all shadow-xl hover:shadow-blue-500/5"
                   >
                     <div className="flex justify-between items-start mb-6">
                       <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
