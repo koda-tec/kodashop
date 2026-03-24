@@ -116,7 +116,7 @@ export default function StoreDetailPage() {
           {/* Lista de Productos */}
           <div className={showForm ? "lg:col-span-8" : "lg:col-span-12"}>
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((p: any) => (
+                {Array.isArray(products) && products.map((p: any) => (
                   <div key={p.id} className="bg-slate-900 border border-slate-800 rounded-4xl overflow-hidden group">
                     <div className="aspect-square bg-slate-950 relative overflow-hidden">
                        <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500" />
