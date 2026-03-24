@@ -1,3 +1,4 @@
+// apps/api/src/stores/stores.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -5,15 +6,22 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StoresService {
   constructor(private prisma: PrismaService) {}
 
-  // Función para crear la tienda en la DB
-  async createStore(data: { name: string; subdomain: string; ownerEmail: string }) {
+  // Añadimos userId a la definición de los datos
+  async createStore(data: { name: string; subdomain: string; ownerEmail: string; userId: string }) {
     return this.prisma.store.create({
-      data,
+      data: {
+        name: data.name,
+        subdomain: data.subdomain,
+        ownerEmail: data.ownerEmail,
+        userId: data.userId, // <--- Esto es lo que faltaba
+      },
     });
   }
 
-  // Función para listar todas las tiendas
-  async findAll() {
-    return this.prisma.store.findMany();
+  // Cambiamos findAll por findAllByUser para que no traiga todo
+  async findAllByUser(userId: string) {
+    return this.prisma.store.findMany({
+      where: { userId },
+    });
   }
 }
