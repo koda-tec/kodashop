@@ -59,28 +59,36 @@ function LoginForm() {
 
   <form onSubmit={handleLogin} className="space-y-5">
     {/* Input Correo */}
-    <div className="relative flex items-center">
-      <Mail className="absolute left-4 text-slate-500 pointer-events-none" size={18} />
-      <input 
-        type="email" 
-        placeholder="Correo electrónico" 
-        className="w-full bg-slate-950 border border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium"
-        required 
-        onChange={e => setEmail(e.target.value)}
-      />
-    </div>
+    {/* Input de Correo */}
+<div className="relative flex items-center">
+  <Mail 
+    className="absolute left-4 text-slate-500 z-10 pointer-events-none" 
+    size={20} 
+  />
+  <input 
+    type="email" 
+    placeholder="Correo electrónico" 
+    className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl py-4 pr-4 outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium pl-14!" 
+    required 
+    onChange={e => setEmail(e.target.value)}
+  />
+</div>
 
-    {/* Input Contraseña */}
-    <div className="relative flex items-center">
-      <Lock className="absolute left-4 text-slate-500 pointer-events-none" size={18} />
-      <input 
-        type="password" 
-        placeholder="Contraseña" 
-        className="w-full bg-slate-950 border border-slate-800 pl-12 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium"
-        required 
-        onChange={e => setPassword(e.target.value)}
-      />
-    </div>
+{/* Input de Contraseña */}
+<div className="relative flex items-center mt-5">
+  <Lock 
+    className="absolute left-4 text-slate-500 z-10 pointer-events-none" 
+    size={20} 
+  />
+  <input 
+    type="password" 
+    placeholder="Contraseña" 
+    className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl py-4 pr-4 outline-none focus:ring-2 focus:ring-blue-600 transition-all font-medium pl-14!"
+    required 
+    onChange={e => setPassword(e.target.value)}
+  />
+</div>
+
 
     <button 
       disabled={loading}
