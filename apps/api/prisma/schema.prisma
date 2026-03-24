@@ -30,16 +30,20 @@ model Store {
 
 // 📦 NUEVO MODELO DE PRODUCTOS
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Float
-  images      String[] // Array de URLs (lo que usaremos para las fotos)
-  stock       Int      @default(0)
+  id           String   @id @default(uuid())
+  name         String
+  description  String?  @db.Text
+  price        Float
+  comparePrice Float?   // Precio tachado (oferta)
+  sku          String?  // Código de inventario
+  images       String[] // URLs de fotos
+  videoUrl     String?  // URL del video demostrativo
+  stock        Int      @default(0)
+  isActive     Boolean  @default(true)
   
-  storeId     String   // ID de la tienda a la que pertenece
-  store       Store    @relation(fields: [storeId], references: [id])
+  storeId      String
+  store        Store    @relation(fields: [storeId], references: [id])
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
