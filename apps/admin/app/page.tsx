@@ -12,8 +12,8 @@ export default function LandingPage() {
       
       {/* 🌌 FONDO TÉCNICO ANIMADO */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.15]" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-blue-600/10 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-size-[3rem_3rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.15]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-125 bg-blue-600/10 blur-[120px] rounded-full" />
       </div>
 
       {/* 🟢 NAVBAR (Optimizado Mobile) */}
@@ -47,7 +47,7 @@ export default function LandingPage() {
             </span>
             <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[1.1] mb-6 text-balance">
               Lanza. Valida. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Escala Ventas.</span>
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-indigo-400">Escala Ventas.</span>
             </h1>
             <p className="text-base md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium px-2">
               KodaShop es la plataforma multi-tenant diseñada para validar productos físicos con Meta Ads sin perder tiempo en configuraciones técnicas.
@@ -125,7 +125,7 @@ export default function LandingPage() {
             </ul>
           </div>
           <div className="flex-1 w-full">
-            <div className="bg-slate-950 border border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+            <div className="bg-slate-950 border border-slate-800 p-6 md:p-8 rounded-4xl shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 bg-blue-600/10 rounded-bl-2xl text-[10px] font-bold text-blue-400 uppercase tracking-tighter">
                 Server-Side Architecture
               </div>
@@ -150,8 +150,8 @@ export default function LandingPage() {
 
       {/* 💰 FINAL CTA SECTION */}
       <section className="py-20 md:py-40 px-4">
-        <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-blue-700 to-indigo-900 p-8 md:p-20 rounded-[2rem] md:rounded-[4rem] shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_white_1px,transparent_1px)] bg-[size:20px_20px]" />
+        <div className="max-w-4xl mx-auto text-center bg-linear-to-br from-blue-700 to-indigo-900 p-8 md:p-20 rounded-4xl md:rounded-[4rem] shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,white_1px,transparent_1px)] bg-size-[20px_20px]" />
           <h2 className="text-3xl md:text-6xl font-black text-white mb-8 tracking-tighter leading-tight">
             Deja de configurar. <br /> Empieza a vender.
           </h2>
