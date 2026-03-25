@@ -20,6 +20,8 @@ export default function ProductSection({ storeId, products, categories, attribut
     stock: "0",
     images: [] as string[],
     categoryId: "",
+    costPrice: "",
+    saleEndsAt: "",
     selectedAttributes: [] as any[] // Para variantes: [{ name: "Color", selectedValues: ["Rojo"] }]
   });
 
@@ -105,7 +107,7 @@ export default function ProductSection({ storeId, products, categories, attribut
 
       if (res.ok) {
         setShowForm(false);
-        setForm({ name: "", description: "", price: "", comparePrice: "", sku: "", stock: "0", images: [], categoryId: "", selectedAttributes: [] });
+        setForm({ name: "", description: "", price: "", comparePrice: "", sku: "", stock: "0", images: [], categoryId: "", selectedAttributes: [], costPrice: "0", saleEndsAt: "0" });
         onRefresh();
       }
     } catch (error) {
@@ -162,6 +164,27 @@ export default function ProductSection({ storeId, products, categories, attribut
                       <label className="text-[10px] font-black text-emerald-500 uppercase ml-2 italic">Precio Oferta</label>
                       <input type="number" placeholder="Opcional" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl font-bold text-emerald-400" value={form.comparePrice} onChange={e => setForm({...form, comparePrice: e.target.value})} />
                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2">Costo (Privado)</label>
+                    <input 
+                      type="number" 
+                      placeholder="¿Cuánto te costó?" 
+                      className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" 
+                      value={form.costPrice} 
+                      onChange={e => setForm({...form, costPrice: e.target.value})} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-orange-500 uppercase ml-2 italic">Fin de la Oferta</label>
+                    <input 
+                      type="datetime-local" 
+                      className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs text-white" 
+                      value={form.saleEndsAt} 
+                      onChange={e => setForm({...form, saleEndsAt: e.target.value})} 
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -251,29 +274,58 @@ export default function ProductSection({ storeId, products, categories, attribut
 
       {/* 📋 LISTADO DE PRODUCTOS CARGADOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
-        {Array.isArray(products) && products.map((p: any) => (
-          <div key={p.id} className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden group hover:border-blue-500/50 transition-all shadow-xl">
-            <div className="aspect-square relative bg-slate-950 overflow-hidden">
-               <img src={p.images[0] || "/api/placeholder/400/400"} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
-               <div className="absolute top-6 right-6 bg-blue-600 px-4 py-2 rounded-full text-xs font-black shadow-2xl">${p.price}</div>
-               {p.comparePrice && <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg">Oferta</div>}
+        {Array.isArray(products) && products.map((p: any) => {
+          
+          // --- LÓGICA DE VALIDACIÓN DE OFERTA ---
+          // Si no hay fecha, la oferta es permanente. 
+          // Si hay fecha, comparamos si la fecha de hoy es menor a la fecha límite.
+          const isSaleValid = p.saleEndsAt ? new Date(p.saleEndsAt) > new Date() : true;
+
+          return (
+            <div key={p.id} className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden group hover:border-blue-500/50 transition-all shadow-xl">
+              <div className="aspect-square relative bg-slate-950 overflow-hidden">
+                <img src={p.images[0] || "/api/placeholder/400/400"} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                
+                {/* PRECIO PRINCIPAL (Siempre visible) */}
+                <div className="absolute top-6 right-6 bg-blue-600 px-4 py-2 rounded-full text-xs font-black shadow-2xl">
+                    ${p.price}
+                </div>
+
+                {/* ETIQUETA DE OFERTA (Solo si existe comparePrice Y la oferta no ha expirado) */}
+                {p.comparePrice && isSaleValid && (
+                    <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg animate-pulse">
+                      Oferta
+                    </div>
+                )}
+              </div>
+
+              <div className="p-8">
+                <h3 className="font-black text-xl tracking-tight mb-2 uppercase italic text-white">{p.name}</h3>
+                
+                {/* Muestra la fecha de expiración si existe (opcional, para control del admin) */}
+                {p.saleEndsAt && (
+                  <p className={`text-[9px] font-bold uppercase tracking-widest mb-4 ${isSaleValid ? 'text-orange-500' : 'text-slate-600'}`}>
+                    {isSaleValid ? `Oferta termina: ${new Date(p.saleEndsAt).toLocaleString()}` : "Oferta Finalizada"}
+                  </p>
+                )}
+
+                <p className="text-slate-500 text-xs line-clamp-2 mb-6 font-medium">{p.description}</p>
+                
+                <div className="flex justify-between items-center pt-6 border-t border-slate-800/50">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Existencias</span>
+                      <span className="text-sm font-bold text-white">{p.stock} U.</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="p-3 bg-slate-800 rounded-xl hover:bg-red-500/20 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                      <button className="p-3 bg-slate-800 rounded-xl hover:bg-blue-600 transition-colors"><Box size={16} /></button>
+                    </div>
+                </div>
+              </div>
             </div>
-            <div className="p-8">
-               <h3 className="font-black text-xl tracking-tight mb-2 uppercase italic text-white">{p.name}</h3>
-               <p className="text-slate-500 text-xs line-clamp-2 mb-6 font-medium">{p.description}</p>
-               <div className="flex justify-between items-center pt-6 border-t border-slate-800/50">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Existencias</span>
-                    <span className="text-sm font-bold text-white">{p.stock} U.</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="p-3 bg-slate-800 rounded-xl hover:bg-red-500/20 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
-                    <button className="p-3 bg-slate-800 rounded-xl hover:bg-blue-600 transition-colors"><Box size={16} /></button>
-                  </div>
-               </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
+
 
         {(!products || products.length === 0) && (
           <div className="col-span-full py-32 bg-slate-900/10 border-2 border-dashed border-slate-800/50 rounded-[4rem] text-center">

@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "costPrice" DOUBLE PRECISION,
+ADD COLUMN     "isHot" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "saleEndsAt" TIMESTAMP(3),
+ADD COLUMN     "slug" TEXT,
+ADD COLUMN     "status" TEXT NOT NULL DEFAULT 'PUBLISHED';

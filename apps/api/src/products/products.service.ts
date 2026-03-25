@@ -7,29 +7,22 @@ export class ProductsService {
 
  async create(data: any) {
   try {
-    const price = parseFloat(data.price) || 0;
-    const comparePrice = data.comparePrice ? parseFloat(data.comparePrice) : null;
-    const stock = parseInt(data.stock) || 0;
-    
-    // Si categoryId es un string vacío o demasiado corto, lo hacemos null
-    const categoryId = data.categoryId && data.categoryId.length > 10 ? data.categoryId : null;
-
     return await this.prisma.product.create({
       data: {
         name: data.name,
-        description: data.description || "",
-        price: price,
-        comparePrice: comparePrice,
+        description: data.description,
+        price: parseFloat(data.price),
+        comparePrice: data.comparePrice ? parseFloat(data.comparePrice) : null,
+        saleEndsAt: data.saleEndsAt ? new Date(data.saleEndsAt) : null, 
+        costPrice: data.costPrice ? parseFloat(data.costPrice) : null,
         sku: data.sku || null,
-        stock: stock,
+        stock: parseInt(data.stock) || 0,
         images: data.images || [],
-        videoUrl: data.videoUrl || null,
         storeId: data.storeId,
-        categoryId: categoryId, // Pasamos el ID directamente
+        categoryId: data.categoryId || null,
       },
     });
   } catch (error) {
-    console.error("❌ ERROR CRÍTICO EN PRISMA:", error);
     throw new InternalServerErrorException(error.message);
   }
 }

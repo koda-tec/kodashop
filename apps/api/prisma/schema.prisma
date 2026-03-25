@@ -48,6 +48,11 @@ model Product {
   name         String
   description  String?
   price        Float
+  costPrice    Float?    // Cuánto te costó el producto (para calcular ganancia)
+  saleEndsAt   DateTime? // Cuándo termina la oferta
+  status       String    @default("PUBLISHED") // DRAFT o PUBLISHED
+  isHot        Boolean   @default(false)       // Etiqueta de "Hot"
+  slug         String?   // URL amigable
   comparePrice Float?
   sku          String?  
   images       String[]
