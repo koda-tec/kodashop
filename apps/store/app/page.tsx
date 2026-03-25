@@ -48,7 +48,7 @@ export default async function StoreFront() {
   } as React.CSSProperties;
 
   return (
-    <div style={themeStyles} className="bg-background min-h-screen text-white font-sans selection:bg-(--primary)/30">
+      <div style={themeStyles} className="min-h-screen bg-black text-white font-sans selection:bg-(--primary)/30">
       
       {/* 📢 ANNOUNCEMENT BAR */}
       {store.announcement && (
