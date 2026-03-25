@@ -103,7 +103,6 @@ export default function AppearanceSection({ storeId }: { storeId: string }) {
               </div>
 
               {/* Colores */}
-   // Dentro de AppearanceSection.tsx, en la sección de Paleta de Colores:
 
             <div className="space-y-4">
             <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Paleta de Colores</label>
