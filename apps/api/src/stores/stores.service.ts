@@ -24,4 +24,25 @@ export class StoresService {
       where: { userId },
     });
   }
+
+async update(id: string, data: any) {
+  return await this.prisma.store.update({
+    where: { id },
+    data: {
+      name: data.name,
+      logo: data.logo,
+      primaryColor: data.primaryColor,
+      secondaryColor: data.secondaryColor,
+      templateId: data.templateId,
+    },
+  });
+}
+
+// También añade este para obtener los datos de una sola tienda
+async findOne(id: string) {
+  return await this.prisma.store.findUnique({
+    where: { id },
+  });
+}
+
 }

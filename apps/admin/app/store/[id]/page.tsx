@@ -6,6 +6,7 @@ import Sidebar from "@/components/store/Sidebar";
 import ProductSection from "@/components/store/ProductSection";
 import CategorySection from "@/components/store/CategorySection";
 import AttributeSection from "@/components/store/AttributeSection";
+import AppearanceSection from "@/components/store/AppearanceSection";
 
 export default function StoreDetailPage() {
   const params = useParams();
@@ -87,6 +88,11 @@ export default function StoreDetailPage() {
             </motion.div>
           )}
 
+          {activeTab === "appearance" && (
+            <motion.div key="appearance" initial={{opacity:0, y: 10}} animate={{opacity:1, y: 0}}>
+              <AppearanceSection storeId={id} />
+            </motion.div>
+          )}
           {activeTab === "appearance" && <div key="app" className="py-20 text-center text-slate-500 font-bold uppercase italic">Módulo de Diseño próximamente</div>}
           {activeTab === "marketing" && <div key="mark" className="py-20 text-center text-slate-500 font-bold uppercase italic">Módulo de Meta Ads próximamente</div>}
         </AnimatePresence>

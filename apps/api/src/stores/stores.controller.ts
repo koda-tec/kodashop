@@ -1,5 +1,5 @@
 // apps/api/src/stores/stores.controller.ts
-import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, Patch, Param } from '@nestjs/common';
 import { StoresService } from './stores.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -23,4 +23,16 @@ export class StoresController {
   findAll(@Request() req: any) {
     return this.storesService.findAllByUser(req.user.sub);
   }
+
+  @UseGuards(JwtAuthGuard)
+@Get(':id')
+async findOne(@Param('id') id: string) {
+  return this.storesService.findOne(id);
+}
+
+@UseGuards(JwtAuthGuard)
+@Patch(':id')
+async update(@Param('id') id: string, @Body() body: any) {
+  return this.storesService.update(id, body);
+}
 }
