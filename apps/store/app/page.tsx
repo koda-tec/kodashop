@@ -48,11 +48,11 @@ export default async function StoreFront() {
   } as React.CSSProperties;
 
   return (
-    <div style={themeStyles} className="bg-[var(--background)] min-h-screen text-white font-sans selection:bg-[var(--primary)]/30">
+    <div style={themeStyles} className="bg-background min-h-screen text-white font-sans selection:bg-(--primary)/30">
       
       {/* 📢 ANNOUNCEMENT BAR */}
       {store.announcement && (
-        <div className="bg-[var(--primary)] text-white text-center py-2.5 text-[10px] font-black uppercase tracking-[0.2em] sticky top-0 z-[100]">
+        <div className="bg-(--primary) text-white text-center py-2.5 text-[10px] font-black uppercase tracking-[0.2em] sticky top-0 z-100">
           {store.announcement}
         </div>
       )}
@@ -66,7 +66,7 @@ export default async function StoreFront() {
         )}
         
         <div className="bg-white/5 border border-white/10 p-3 rounded-2xl relative cursor-pointer">
-           <span className="absolute -top-1 -right-1 bg-[var(--primary)] w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold">0</span>
+           <span className="absolute -top-1 -right-1 bg-(--primary) w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold">0</span>
            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         </div>
       </nav>
