@@ -93,7 +93,6 @@ export default function StoreDetailPage() {
               <AppearanceSection storeId={id} />
             </motion.div>
           )}
-          {activeTab === "appearance" && <div key="app" className="py-20 text-center text-slate-500 font-bold uppercase italic">Módulo de Diseño próximamente</div>}
           {activeTab === "marketing" && <div key="mark" className="py-20 text-center text-slate-500 font-bold uppercase italic">Módulo de Meta Ads próximamente</div>}
         </AnimatePresence>
       </main>
