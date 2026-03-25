@@ -18,6 +18,8 @@ export class ProductsService {
         sku: data.sku || null,
         stock: parseInt(data.stock) || 0,
         images: data.images || [],
+        videos: data.videos || [], 
+        status: data.status || "PUBLISHED",
         storeId: data.storeId,
         categoryId: data.categoryId || null,
       },

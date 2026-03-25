@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { 
   Plus, X, Upload, Loader2, Image as ImageIcon, 
-  Trash2, Tag, ChevronDown, Box, DollarSign, Layers
+  Video, Trash2, Tag, ChevronDown, Box, DollarSign, 
+  Layers, EyeOff, CheckCircle2, AlertCircle 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -10,7 +11,7 @@ export default function ProductSection({ storeId, products, categories, attribut
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
   
-  // 1. ESTADO DEL FORMULARIO COMPLETO
+  // 1. ESTADO DEL FORMULARIO COMPLETO (Incluye Status y Videos)
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -19,19 +20,21 @@ export default function ProductSection({ storeId, products, categories, attribut
     sku: "",
     stock: "0",
     images: [] as string[],
+    videos: [] as string[], // Añadido soporte para múltiples videos
     categoryId: "",
+    status: "PUBLISHED", // PUBLISHED | DRAFT
     costPrice: "",
     saleEndsAt: "",
-    selectedAttributes: [] as any[] // Para variantes: [{ name: "Color", selectedValues: ["Rojo"] }]
+    selectedAttributes: [] as any[]
   });
 
-  // CONFIGURACIÓN CLOUDINARY (Sustituir con tus datos)
+  // CONFIGURACIÓN CLOUDINARY
   const CLOUD_NAME = "dvkvx5dzz"; 
   const UPLOAD_PRESET = "kodashop"; 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-  // --- LÓGICA DE MULTIMEDIA ---
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // --- LÓGICA DE MULTIMEDIA (Fotos y Videos) ---
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'images' | 'videos') => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
@@ -45,7 +48,7 @@ export default function ProductSection({ storeId, products, categories, attribut
         body: formData
       });
       const data = await res.json();
-      setForm(prev => ({ ...prev, images: [...prev.images, data.secure_url] }));
+      setForm(prev => ({ ...prev, [type]: [...prev[type as keyof typeof prev] as string[], data.secure_url] }));
     } catch (err) {
       alert("Error al subir archivo");
     } finally {
@@ -53,8 +56,11 @@ export default function ProductSection({ storeId, products, categories, attribut
     }
   };
 
-  const removeImage = (index: number) => {
-    setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  const removeItem = (index: number, type: 'images' | 'videos') => {
+    setForm(prev => ({ 
+      ...prev, 
+      [type]: (prev[type as keyof typeof prev] as string[]).filter((_, i) => i !== index) 
+    }));
   };
 
   // --- LÓGICA DE ATRIBUTOS ---
@@ -87,11 +93,9 @@ export default function ProductSection({ storeId, products, categories, attribut
     e.preventDefault();
     const token = localStorage.getItem("koda_token");
     
-    // Preparar payload enviando variantes generadas o estructura de atributos
     const payload = {
       ...form,
       storeId,
-      // Mapeamos los atributos para que el backend los reciba limpio
       variants: form.selectedAttributes.map(a => ({
         name: a.name,
         values: a.selectedValues
@@ -107,7 +111,7 @@ export default function ProductSection({ storeId, products, categories, attribut
 
       if (res.ok) {
         setShowForm(false);
-        setForm({ name: "", description: "", price: "", comparePrice: "", sku: "", stock: "0", images: [], categoryId: "", selectedAttributes: [], costPrice: "0", saleEndsAt: "0" });
+        setForm({ name: "", description: "", price: "", comparePrice: "", sku: "", stock: "0", images: [], videos: [], categoryId: "", selectedAttributes: [], costPrice: "", saleEndsAt: "", status: "PUBLISHED" });
         onRefresh();
       }
     } catch (error) {
@@ -116,7 +120,7 @@ export default function ProductSection({ storeId, products, categories, attribut
   };
 
   return (
-    <div className="space-y-10 pt-12 md:pt-0">
+    <div className="space-y-10 pt-14 md:pt-0"> {/* pt-14 evita choque con menú mobile */}
       
       {/* 🟢 HEADER RESPONSIVE */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -143,17 +147,14 @@ export default function ProductSection({ storeId, products, categories, attribut
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               
-              {/* IZQUIERDA: TEXTOS Y PRECIOS */}
+              {/* IZQUIERDA: INFO, PRECIOS Y ESTADO */}
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-2">Nombre</label>
                   <input placeholder="Nombre del producto" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white outline-none focus:ring-2 focus:ring-blue-600" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Descripción persuasiva</label>
-                  <textarea placeholder="Háblale a tu cliente de los beneficios..." className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white h-40 text-sm outline-none focus:ring-2 focus:ring-blue-600" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
-                </div>
+                <textarea placeholder="Descripción persuasiva..." className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white h-32 text-sm outline-none focus:ring-2 focus:ring-blue-600" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
 
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
@@ -165,108 +166,99 @@ export default function ProductSection({ storeId, products, categories, attribut
                       <input type="number" placeholder="Opcional" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl font-bold text-emerald-400" value={form.comparePrice} onChange={e => setForm({...form, comparePrice: e.target.value})} />
                    </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2">Costo (Privado)</label>
-                    <input 
-                      type="number" 
-                      placeholder="¿Cuánto te costó?" 
-                      className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" 
-                      value={form.costPrice} 
-                      onChange={e => setForm({...form, costPrice: e.target.value})} 
-                    />
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Costo (Margen)</label>
+                    <input type="number" placeholder="0.00" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.costPrice} onChange={e => setForm({...form, costPrice: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-orange-500 uppercase ml-2 italic">Fin de la Oferta</label>
-                    <input 
-                      type="datetime-local" 
-                      className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs text-white" 
-                      value={form.saleEndsAt} 
-                      onChange={e => setForm({...form, saleEndsAt: e.target.value})} 
-                    />
+                    <label className="text-[10px] font-black text-orange-500 uppercase ml-2 italic text-balance">Fin de Oferta</label>
+                    <input type="datetime-local" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs text-white" value={form.saleEndsAt} onChange={e => setForm({...form, saleEndsAt: e.target.value})} />
                   </div>
+                </div>
+
+                <div className="space-y-2 pt-4">
+                    <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-2">Visibilidad del Producto</label>
+                    <select className="w-full bg-blue-600 text-white font-black p-4 rounded-2xl text-xs uppercase tracking-widest cursor-pointer" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
+                        <option value="PUBLISHED">🟢 Publicado (Visible en Web)</option>
+                        <option value="DRAFT">🟠 Borrador (Solo Admin)</option>
+                    </select>
                 </div>
               </div>
 
               {/* DERECHA: LOGÍSTICA, ATRIBUTOS Y MULTIMEDIA */}
               <div className="space-y-8">
-                
-                {/* SKU, Stock y Categoría */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">SKU</label>
-                      <input placeholder="REF-001" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Stock Inicial</label>
-                      <input type="number" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} />
-                   </div>
-                   <div className="col-span-full space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Categoría del Producto</label>
+                   <input placeholder="SKU: REF-001" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} />
+                   <input type="number" placeholder="Stock Inicial" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} />
+                   <div className="col-span-full">
                       <select className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-sm" value={form.categoryId} onChange={e => setForm({...form, categoryId: e.target.value})}>
-                        <option value="">Sin Categoría</option>
+                        <option value="">Seleccionar Categoría</option>
                         {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                    </div>
                 </div>
 
-                {/* SELECTOR DE ATRIBUTOS (Variantes) */}
+                {/* ATRIBUTOS */}
                 <div className="bg-slate-950/50 p-6 rounded-3xl border border-slate-800">
-                  <h3 className="text-[10px] font-black text-blue-400 tracking-widest uppercase mb-4 flex items-center gap-2">
-                    <Layers size={14}/> Atributos Disponibles
-                  </h3>
+                  <h3 className="text-[10px] font-black text-blue-400 tracking-widest uppercase mb-4 flex items-center gap-2 italic"><Layers size={14}/> Atributos de Variación</h3>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {attributes?.map((attr: any) => (
-                      <button key={attr.id} type="button" onClick={() => addAttributeRow(attr)} className="bg-slate-800 hover:bg-blue-600 text-[10px] font-black px-4 py-2 rounded-xl transition-all">
-                        + {attr.name}
-                      </button>
+                      <button key={attr.id} type="button" onClick={() => addAttributeRow(attr)} className="bg-slate-800 hover:bg-blue-600 text-[10px] font-black px-4 py-2 rounded-xl transition-all uppercase">+ {attr.name}</button>
                     ))}
                   </div>
-
                   <div className="space-y-4">
                     {form.selectedAttributes.map((attr: any) => (
                       <div key={attr.id} className="p-4 bg-slate-900 rounded-2xl border border-slate-800 relative">
                         <button type="button" onClick={() => setForm({...form, selectedAttributes: form.selectedAttributes.filter(a => a.id !== attr.id)})} className="absolute top-2 right-2 text-slate-600 hover:text-red-500"><X size={14}/></button>
-                        <p className="text-[10px] font-black text-slate-500 uppercase mb-3 italic">{attr.name}</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase mb-3">{attr.name}</p>
                         <div className="flex flex-wrap gap-2">
-                          {attr.values.map((val: string) => {
-                            const isSel = attr.selectedValues.includes(val);
-                            return (
-                              <button key={val} type="button" onClick={() => toggleAttrValue(attr.id, val)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all ${isSel ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-500'}`}>
-                                {val}
-                              </button>
-                            );
-                          })}
+                          {attr.values.map((val: string) => (
+                            <button key={val} type="button" onClick={() => toggleAttrValue(attr.id, val)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all ${attr.selectedValues.includes(val) ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-500'}`}>{val}</button>
+                          ))}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* MULTIMEDIA */}
+                {/* MULTIMEDIA MÚLTIPLE */}
                 <div className="space-y-4">
-                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 p-8 rounded-3xl cursor-pointer hover:border-blue-600 transition-all bg-slate-950/50 group">
-                    {uploading ? <Loader2 className="animate-spin text-blue-500" /> : <Upload className="text-slate-600 group-hover:text-blue-500 transition-colors" />}
-                    <span className="mt-2 text-[10px] font-black uppercase tracking-widest text-slate-500">Subir fotos desde dispositivo</span>
-                    <input type="file" className="hidden" onChange={handleUpload} accept="image/*" disabled={uploading} />
-                  </label>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 p-6 rounded-3xl cursor-pointer hover:border-blue-600 bg-slate-950/50">
+                        {uploading ? <Loader2 className="animate-spin text-blue-500" /> : <ImageIcon className="text-slate-600" />}
+                        <span className="mt-2 text-[9px] font-black uppercase text-slate-500 text-center">Añadir Fotos</span>
+                        <input type="file" className="hidden" onChange={(e) => handleUpload(e, 'images')} accept="image/*" disabled={uploading} />
+                    </label>
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 p-6 rounded-3xl cursor-pointer hover:border-emerald-600 bg-slate-950/50">
+                        {uploading ? <Loader2 className="animate-spin text-emerald-500" /> : <Video className="text-slate-600" />}
+                        <span className="mt-2 text-[9px] font-black uppercase text-slate-500 text-center">Añadir Videos</span>
+                        <input type="file" className="hidden" onChange={(e) => handleUpload(e, 'videos')} accept="video/*" disabled={uploading} />
+                    </label>
+                  </div>
+                  
+                  {/* GALERÍA DE PREVIA */}
+                  <div className="flex flex-wrap gap-3 p-4 bg-slate-950 rounded-2xl border border-slate-800">
                     {form.images.map((img, i) => (
-                      <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-700 group">
+                      <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-700 group">
                         <img src={img} className="w-full h-full object-cover" />
-                        <button type="button" onClick={() => removeImage(i)} className="absolute inset-0 bg-red-600/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Trash2 size={16} />
-                        </button>
+                        <button type="button" onClick={() => removeItem(i, 'images')} className="absolute inset-0 bg-red-600/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X size={14}/></button>
+                      </div>
+                    ))}
+                    {form.videos.map((vid, i) => (
+                      <div key={i} className="relative w-14 h-14 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 group">
+                        <Video size={14} className="text-emerald-500" />
+                        <button type="button" onClick={() => removeItem(i, 'videos')} className="absolute inset-0 bg-red-600/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white"><X size={14}/></button>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <button disabled={uploading} className="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-3xl font-black text-lg transition-all shadow-2xl shadow-blue-600/20 disabled:opacity-50">
-                  {uploading ? "SUBIENDO ARCHIVOS..." : "PUBLICAR PRODUCTO"}
+                <button disabled={uploading} className="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-3xl font-black text-lg transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50">
+                  {uploading ? "SUBIENDO RECURSOS..." : "PUBLICAR EN TIENDA"}
                 </button>
               </div>
-
             </div>
           </motion.form>
         )}
@@ -275,23 +267,27 @@ export default function ProductSection({ storeId, products, categories, attribut
       {/* 📋 LISTADO DE PRODUCTOS CARGADOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
         {Array.isArray(products) && products.map((p: any) => {
-          
-          // --- LÓGICA DE VALIDACIÓN DE OFERTA ---
-          // Si no hay fecha, la oferta es permanente. 
-          // Si hay fecha, comparamos si la fecha de hoy es menor a la fecha límite.
           const isSaleValid = p.saleEndsAt ? new Date(p.saleEndsAt) > new Date() : true;
+          const isDraft = p.status === "DRAFT";
 
           return (
-            <div key={p.id} className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden group hover:border-blue-500/50 transition-all shadow-xl">
+            <div key={p.id} className={`bg-slate-900/40 border ${isDraft ? 'border-orange-500/30' : 'border-slate-800'} rounded-[2.5rem] overflow-hidden group hover:border-blue-500/50 transition-all shadow-xl`}>
               <div className="aspect-square relative bg-slate-950 overflow-hidden">
-                <img src={p.images[0] || "/api/placeholder/400/400"} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                <img src={p.images[0] || "/api/placeholder/400/400"} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${isDraft && 'opacity-30 grayscale'}`} />
                 
-                {/* PRECIO PRINCIPAL (Siempre visible) */}
-                <div className="absolute top-6 right-6 bg-blue-600 px-4 py-2 rounded-full text-xs font-black shadow-2xl">
-                    ${p.price}
+                {/* Status Badges */}
+                <div className={`absolute top-6 right-6 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl ${isDraft ? 'bg-orange-600 text-white' : 'bg-emerald-600 text-white'}`}>
+                    {isDraft ? "Borrador" : "Publicado"}
                 </div>
 
-                {/* ETIQUETA DE OFERTA (Solo si existe comparePrice Y la oferta no ha expirado) */}
+                {/* SKU Badge */}
+                {p.sku && (
+                  <div className="absolute bottom-6 left-6 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-[9px] font-black text-slate-300 uppercase italic">
+                    SKU: {p.sku}
+                  </div>
+                )}
+
+                {/* ETIQUETA DE OFERTA */}
                 {p.comparePrice && isSaleValid && (
                     <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg animate-pulse">
                       Oferta
@@ -300,16 +296,18 @@ export default function ProductSection({ storeId, products, categories, attribut
               </div>
 
               <div className="p-8">
-                <h3 className="font-black text-xl tracking-tight mb-2 uppercase italic text-white">{p.name}</h3>
+                <h3 className="font-black text-xl tracking-tight mb-2 uppercase italic text-white truncate">{p.name}</h3>
                 
-                {/* Muestra la fecha de expiración si existe (opcional, para control del admin) */}
-                {p.saleEndsAt && (
-                  <p className={`text-[9px] font-bold uppercase tracking-widest mb-4 ${isSaleValid ? 'text-orange-500' : 'text-slate-600'}`}>
-                    {isSaleValid ? `Oferta termina: ${new Date(p.saleEndsAt).toLocaleString()}` : "Oferta Finalizada"}
+                <div className="flex items-center gap-3 mb-6">
+                    <span className={`text-2xl font-black ${p.comparePrice && isSaleValid ? 'text-emerald-400' : 'text-blue-500'}`}>${p.price}</span>
+                    {p.comparePrice && isSaleValid && <span className="text-sm text-slate-500 line-through font-bold">${p.comparePrice}</span>}
+                </div>
+
+                {p.saleEndsAt && isSaleValid && (
+                  <p className="text-[9px] font-bold uppercase tracking-widest mb-4 text-orange-500 flex items-center gap-1">
+                    <AlertCircle size={10} /> Expira: {new Date(p.saleEndsAt).toLocaleDateString()}
                   </p>
                 )}
-
-                <p className="text-slate-500 text-xs line-clamp-2 mb-6 font-medium">{p.description}</p>
                 
                 <div className="flex justify-between items-center pt-6 border-t border-slate-800/50">
                     <div className="flex flex-col">
@@ -325,7 +323,6 @@ export default function ProductSection({ storeId, products, categories, attribut
             </div>
           );
         })}
-
 
         {(!products || products.length === 0) && (
           <div className="col-span-full py-32 bg-slate-900/10 border-2 border-dashed border-slate-800/50 rounded-[4rem] text-center">
