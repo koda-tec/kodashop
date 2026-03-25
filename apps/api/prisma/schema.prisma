@@ -26,6 +26,13 @@ model Store {
   primaryColor  String    @default("#2563eb")
   secondaryColor String   @default("#0f172a")
   templateId    String    @default("default") // Para cambiar entre diseños
+
+  announcement    String?   // "Envío gratis a todo el país"
+  heroTitle       String?   // "La mejor tecnología en tus manos"
+  heroSubtitle    String?   // "Calidad garantizada al mejor precio"
+  whatsapp        String?   // Número de contacto
+  banners         String[]  // Array de URLs de Cloudinary para el carrusel
+
   // -------------------------
   userId        String
   user          User      @relation(fields: [userId], references: [id])

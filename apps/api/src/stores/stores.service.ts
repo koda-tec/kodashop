@@ -6,43 +6,50 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StoresService {
   constructor(private prisma: PrismaService) {}
 
-  // Añadimos userId a la definición de los datos
+  // 1. Crear tienda vinculada al usuario
   async createStore(data: { name: string; subdomain: string; ownerEmail: string; userId: string }) {
     return this.prisma.store.create({
       data: {
         name: data.name,
         subdomain: data.subdomain,
         ownerEmail: data.ownerEmail,
-        userId: data.userId, // <--- Esto es lo que faltaba
+        userId: data.userId,
       },
     });
   }
 
-  // Cambiamos findAll por findAllByUser para que no traiga todo
+  // 2. Listar solo las tiendas del usuario logueado
   async findAllByUser(userId: string) {
     return this.prisma.store.findMany({
       where: { userId },
+      orderBy: { createdAt: 'desc' }
     });
   }
 
-async update(id: string, data: any) {
-  return await this.prisma.store.update({
-    where: { id },
-    data: {
-      name: data.name,
-      logo: data.logo,
-      primaryColor: data.primaryColor,
-      secondaryColor: data.secondaryColor,
-      templateId: data.templateId,
-    },
-  });
-}
+  // 3. Obtener los datos de una sola tienda (para cargar el panel de diseño/productos)
+  async findOne(id: string) {
+    return await this.prisma.store.findUnique({
+      where: { id },
+    });
+  }
 
-// También añade este para obtener los datos de una sola tienda
-async findOne(id: string) {
-  return await this.prisma.store.findUnique({
-    where: { id },
-  });
-}
-
+  // 4. Actualizar toda la configuración de la tienda (Branding + Marketing)
+  async update(id: string, data: any) {
+    return await this.prisma.store.update({
+      where: { id },
+      data: {
+        name: data.name,
+        logo: data.logo,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        templateId: data.templateId,
+        // --- Campos de Marketing y Conversión ---
+        announcement: data.announcement,
+        heroTitle: data.heroTitle,
+        heroSubtitle: data.heroSubtitle,
+        whatsapp: data.whatsapp,
+        banners: data.banners, // Prisma maneja el array de strings automáticamente
+      },
+    });
+  }
 }
