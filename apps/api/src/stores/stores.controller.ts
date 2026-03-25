@@ -35,4 +35,10 @@ async findOne(@Param('id') id: string) {
 async update(@Param('id') id: string, @Body() body: any) {
   return this.storesService.update(id, body);
 }
+
+// GET /stores/public/:subdomain
+@Get('public/:subdomain')
+async getPublicStore(@Param('subdomain') subdomain: string) {
+  return this.storesService.findBySubdomain(subdomain);
+}
 }

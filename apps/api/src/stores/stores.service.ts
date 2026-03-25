@@ -52,4 +52,16 @@ export class StoresService {
       },
     });
   }
+  async findBySubdomain(subdomain: string) {
+  return await this.prisma.store.findUnique({
+    where: { subdomain },
+    include: {
+      categories: true,
+      products: {
+        where: { status: 'PUBLISHED' }, // Solo lo que no es borrador
+        orderBy: { createdAt: 'desc' }
+      }
+    }
+  });
+}
 }
