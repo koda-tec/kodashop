@@ -5,15 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: any) {
+ async create(data: any) {
   try {
-    console.log("📥 DATOS RECIBIDOS:", data);
-
     const price = parseFloat(data.price) || 0;
     const comparePrice = data.comparePrice ? parseFloat(data.comparePrice) : null;
     const stock = parseInt(data.stock) || 0;
     
-    // Validamos que el categoryId sea un ID real (UUID), si es un string vacío lo hacemos null
+    // Si categoryId es un string vacío o demasiado corto, lo hacemos null
     const categoryId = data.categoryId && data.categoryId.length > 10 ? data.categoryId : null;
 
     return await this.prisma.product.create({
@@ -27,15 +25,12 @@ export class ProductsService {
         images: data.images || [],
         videoUrl: data.videoUrl || null,
         storeId: data.storeId,
-        categoryId: categoryId, // <--- CAMBIO CLAVE: Pasamos el ID directamente como un string
+        categoryId: categoryId, // Pasamos el ID directamente
       },
     });
   } catch (error) {
     console.error("❌ ERROR CRÍTICO EN PRISMA:", error);
-    throw new InternalServerErrorException({
-      message: "Error en el servidor al crear producto",
-      detail: error.message
-    });
+    throw new InternalServerErrorException(error.message);
   }
 }
 
