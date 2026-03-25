@@ -3,15 +3,16 @@ import { useState } from "react";
 import { 
   Plus, X, Upload, Loader2, Image as ImageIcon, 
   Video, Trash2, Tag, ChevronDown, Box, DollarSign, 
-  Layers, EyeOff, CheckCircle2, AlertCircle 
+  Layers, EyeOff, CheckCircle2, AlertCircle, Edit3 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProductSection({ storeId, products, categories, attributes, onRefresh }: any) {
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   
-  // 1. ESTADO DEL FORMULARIO COMPLETO (Incluye Status y Videos)
+  // 1. ESTADO DEL FORMULARIO INTEGRAL
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -20,20 +21,51 @@ export default function ProductSection({ storeId, products, categories, attribut
     sku: "",
     stock: "0",
     images: [] as string[],
-    videos: [] as string[], // Añadido soporte para múltiples videos
+    videos: [] as string[],
     categoryId: "",
-    status: "PUBLISHED", // PUBLISHED | DRAFT
+    status: "PUBLISHED",
     costPrice: "",
     saleEndsAt: "",
     selectedAttributes: [] as any[]
   });
 
-  // CONFIGURACIÓN CLOUDINARY
   const CLOUD_NAME = "dvkvx5dzz"; 
   const UPLOAD_PRESET = "kodashop"; 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-  // --- LÓGICA DE MULTIMEDIA (Fotos y Videos) ---
+  // --- LÓGICA: ELIMINAR PRODUCTO ---
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar este producto? Esta acción no se puede deshacer.")) return;
+    const token = localStorage.getItem("koda_token");
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) onRefresh();
+    } catch (err) {
+      alert("Error al eliminar");
+    }
+  };
+
+  // --- LÓGICA: INICIAR EDICIÓN ---
+  const startEdit = (p: any) => {
+    setEditingId(p.id);
+    setForm({
+      ...p,
+      price: p.price.toString(),
+      comparePrice: p.comparePrice?.toString() || "",
+      stock: p.stock.toString(),
+      costPrice: p.costPrice?.toString() || "",
+      // Formatear fecha para el input datetime-local
+      saleEndsAt: p.saleEndsAt ? new Date(p.saleEndsAt).toISOString().slice(0, 16) : "",
+      selectedAttributes: [] // Reiniciamos selección de atributos para simplificar la UI en edición
+    });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // --- LÓGICA: MULTIMEDIA ---
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'images' | 'videos') => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -48,9 +80,12 @@ export default function ProductSection({ storeId, products, categories, attribut
         body: formData
       });
       const data = await res.json();
-      setForm(prev => ({ ...prev, [type]: [...prev[type as keyof typeof prev] as string[], data.secure_url] }));
+      setForm(prev => ({ 
+        ...prev, 
+        [type]: [...(prev[type as keyof typeof prev] as string[]), data.secure_url] 
+      }));
     } catch (err) {
-      alert("Error al subir archivo");
+      alert("Error en la subida");
     } finally {
       setUploading(false);
     }
@@ -63,75 +98,65 @@ export default function ProductSection({ storeId, products, categories, attribut
     }));
   };
 
-  // --- LÓGICA DE ATRIBUTOS ---
+  // --- LÓGICA: ATRIBUTOS ---
   const addAttributeRow = (attr: any) => {
     if (form.selectedAttributes.find(a => a.id === attr.id)) return;
-    setForm({
-      ...form,
-      selectedAttributes: [...form.selectedAttributes, { ...attr, selectedValues: [] }]
-    });
+    setForm({ ...form, selectedAttributes: [...form.selectedAttributes, { ...attr, selectedValues: [] }] });
   };
 
   const toggleAttrValue = (attrId: string, value: string) => {
     const updated = form.selectedAttributes.map(attr => {
       if (attr.id === attrId) {
         const isSel = attr.selectedValues.includes(value);
-        return {
-          ...attr,
-          selectedValues: isSel 
-            ? attr.selectedValues.filter((v: string) => v !== value)
-            : [...attr.selectedValues, value]
-        };
+        return { ...attr, selectedValues: isSel ? attr.selectedValues.filter((v: string) => v !== value) : [...attr.selectedValues, value] };
       }
       return attr;
     });
     setForm({ ...form, selectedAttributes: updated });
   };
 
-  // --- ENVÍO A LA API ---
+  // --- ENVÍO A LA API (POST o PATCH) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("koda_token");
-    
+    const method = editingId ? "PATCH" : "POST";
+    const url = editingId ? `${API_URL}/products/${editingId}` : `${API_URL}/products`;
+
     const payload = {
       ...form,
       storeId,
-      variants: form.selectedAttributes.map(a => ({
-        name: a.name,
-        values: a.selectedValues
-      }))
+      variants: form.selectedAttributes.map(a => ({ name: a.name, values: a.selectedValues }))
     };
 
     try {
-      const res = await fetch(`${API_URL}/products`, {
-        method: "POST",
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setShowForm(false);
+        setEditingId(null);
         setForm({ name: "", description: "", price: "", comparePrice: "", sku: "", stock: "0", images: [], videos: [], categoryId: "", selectedAttributes: [], costPrice: "", saleEndsAt: "", status: "PUBLISHED" });
         onRefresh();
       }
     } catch (error) {
-      alert("Error en el servidor");
+      alert("Error de conexión");
     }
   };
 
   return (
-    <div className="space-y-10 pt-14 md:pt-0"> {/* pt-14 evita choque con menú mobile */}
+    <div className="space-y-10 pt-14 md:pt-0">
       
-      {/* 🟢 HEADER RESPONSIVE */}
+      {/* 🟢 HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h2 className="text-4xl md:text-6xl font-black italic uppercase text-blue-500 tracking-tighter">
-            Inventario
-          </h2>
-          <p className="text-slate-500 text-[10px] font-bold tracking-[0.4em] uppercase">Gestión de Catálogo Pro</p>
+          <h2 className="text-4xl md:text-6xl font-black italic uppercase text-blue-500 tracking-tighter">Inventario</h2>
+          <p className="text-slate-500 text-[10px] font-bold tracking-[0.4em] uppercase">Control Total de Catálogo</p>
         </div>
         <button 
-          onClick={() => setShowForm(!showForm)} 
+          onClick={() => { setShowForm(!showForm); setEditingId(null); }} 
           className="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white transition-all shadow-xl"
         >
           {showForm ? <X size={20}/> : <Plus size={20}/>} {showForm ? "CANCELAR" : "NUEVO PRODUCTO"}
@@ -145,17 +170,15 @@ export default function ProductSection({ storeId, products, categories, attribut
             onSubmit={handleSubmit} 
             className="bg-slate-900/50 border border-slate-800 p-6 md:p-10 rounded-[3rem] backdrop-blur-xl"
           >
+            <h3 className="text-xl font-black text-white mb-8 uppercase italic">
+                {editingId ? "📝 Editando Producto" : "🚀 Nuevo Producto"}
+            </h3>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              
-              {/* IZQUIERDA: INFO, PRECIOS Y ESTADO */}
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-2">Nombre</label>
-                  <input placeholder="Nombre del producto" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white outline-none focus:ring-2 focus:ring-blue-600" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-                </div>
-
-                <textarea placeholder="Descripción persuasiva..." className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white h-32 text-sm outline-none focus:ring-2 focus:ring-blue-600" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
-
+              <div className="space-y-6 text-white">
+                <input placeholder="Nombre" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+                <textarea placeholder="Descripción..." className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl h-32 text-sm outline-none focus:ring-2 focus:ring-blue-600" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+                
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Precio Venta</label>
@@ -169,40 +192,38 @@ export default function ProductSection({ storeId, products, categories, attribut
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Costo (Margen)</label>
-                    <input type="number" placeholder="0.00" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.costPrice} onChange={e => setForm({...form, costPrice: e.target.value})} />
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Costo</label>
+                    <input type="number" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.costPrice} onChange={e => setForm({...form, costPrice: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-orange-500 uppercase ml-2 italic text-balance">Fin de Oferta</label>
+                    <label className="text-[10px] font-black text-orange-500 uppercase ml-2 italic">Fin de Oferta</label>
                     <input type="datetime-local" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs text-white" value={form.saleEndsAt} onChange={e => setForm({...form, saleEndsAt: e.target.value})} />
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-4">
-                    <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-2">Visibilidad del Producto</label>
-                    <select className="w-full bg-blue-600 text-white font-black p-4 rounded-2xl text-xs uppercase tracking-widest cursor-pointer" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
-                        <option value="PUBLISHED">🟢 Publicado (Visible en Web)</option>
-                        <option value="DRAFT">🟠 Borrador (Solo Admin)</option>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest ml-2">Visibilidad</label>
+                    <select className="w-full bg-blue-600 text-white font-black p-4 rounded-2xl text-xs uppercase cursor-pointer" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
+                        <option value="PUBLISHED">🟢 Publicado</option>
+                        <option value="DRAFT">🟠 Borrador</option>
                     </select>
                 </div>
               </div>
 
-              {/* DERECHA: LOGÍSTICA, ATRIBUTOS Y MULTIMEDIA */}
               <div className="space-y-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <input placeholder="SKU: REF-001" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} />
-                   <input type="number" placeholder="Stock Inicial" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} />
+                   <input placeholder="SKU" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white text-xs" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} />
+                   <input type="number" placeholder="Stock" className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white text-xs" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} />
                    <div className="col-span-full">
-                      <select className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-sm" value={form.categoryId} onChange={e => setForm({...form, categoryId: e.target.value})}>
+                      <select className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white text-sm" value={form.categoryId} onChange={e => setForm({...form, categoryId: e.target.value})}>
                         <option value="">Seleccionar Categoría</option>
                         {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                    </div>
                 </div>
 
-                {/* ATRIBUTOS */}
                 <div className="bg-slate-950/50 p-6 rounded-3xl border border-slate-800">
-                  <h3 className="text-[10px] font-black text-blue-400 tracking-widest uppercase mb-4 flex items-center gap-2 italic"><Layers size={14}/> Atributos de Variación</h3>
+                  <h3 className="text-[10px] font-black text-blue-400 uppercase mb-4 flex items-center gap-2 italic"><Layers size={14}/> Atributos</h3>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {attributes?.map((attr: any) => (
                       <button key={attr.id} type="button" onClick={() => addAttributeRow(attr)} className="bg-slate-800 hover:bg-blue-600 text-[10px] font-black px-4 py-2 rounded-xl transition-all uppercase">+ {attr.name}</button>
@@ -210,7 +231,7 @@ export default function ProductSection({ storeId, products, categories, attribut
                   </div>
                   <div className="space-y-4">
                     {form.selectedAttributes.map((attr: any) => (
-                      <div key={attr.id} className="p-4 bg-slate-900 rounded-2xl border border-slate-800 relative">
+                      <div key={attr.id} className="p-4 bg-slate-900 rounded-2xl border border-slate-800 relative text-white">
                         <button type="button" onClick={() => setForm({...form, selectedAttributes: form.selectedAttributes.filter(a => a.id !== attr.id)})} className="absolute top-2 right-2 text-slate-600 hover:text-red-500"><X size={14}/></button>
                         <p className="text-[10px] font-black text-slate-500 uppercase mb-3">{attr.name}</p>
                         <div className="flex flex-wrap gap-2">
@@ -223,23 +244,20 @@ export default function ProductSection({ storeId, products, categories, attribut
                   </div>
                 </div>
 
-                {/* MULTIMEDIA MÚLTIPLE */}
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 p-6 rounded-3xl cursor-pointer hover:border-blue-600 bg-slate-950/50">
                         {uploading ? <Loader2 className="animate-spin text-blue-500" /> : <ImageIcon className="text-slate-600" />}
-                        <span className="mt-2 text-[9px] font-black uppercase text-slate-500 text-center">Añadir Fotos</span>
+                        <span className="mt-2 text-[9px] font-black uppercase text-slate-500">Fotos</span>
                         <input type="file" className="hidden" onChange={(e) => handleUpload(e, 'images')} accept="image/*" disabled={uploading} />
                     </label>
                     <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 p-6 rounded-3xl cursor-pointer hover:border-emerald-600 bg-slate-950/50">
                         {uploading ? <Loader2 className="animate-spin text-emerald-500" /> : <Video className="text-slate-600" />}
-                        <span className="mt-2 text-[9px] font-black uppercase text-slate-500 text-center">Añadir Videos</span>
+                        <span className="mt-2 text-[9px] font-black uppercase text-slate-500">Videos</span>
                         <input type="file" className="hidden" onChange={(e) => handleUpload(e, 'videos')} accept="video/*" disabled={uploading} />
                     </label>
                   </div>
-                  
-                  {/* GALERÍA DE PREVIA */}
-                  <div className="flex flex-wrap gap-3 p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                  <div className="flex flex-wrap gap-3 p-4 bg-slate-950 rounded-2xl border border-slate-800 min-h-15">
                     {form.images.map((img, i) => (
                       <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-700 group">
                         <img src={img} className="w-full h-full object-cover" />
@@ -255,8 +273,8 @@ export default function ProductSection({ storeId, products, categories, attribut
                   </div>
                 </div>
 
-                <button disabled={uploading} className="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-3xl font-black text-lg transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50">
-                  {uploading ? "SUBIENDO RECURSOS..." : "PUBLICAR EN TIENDA"}
+                <button disabled={uploading} className="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-3xl font-black text-lg transition-all text-white">
+                  {editingId ? "GUARDAR CAMBIOS" : "PUBLICAR PRODUCTO"}
                 </button>
               </div>
             </div>
@@ -264,9 +282,8 @@ export default function ProductSection({ storeId, products, categories, attribut
         )}
       </AnimatePresence>
 
-      {/* 📋 LISTADO DE PRODUCTOS CARGADOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
-        {Array.isArray(products) && products.map((p: any) => {
+        {products.map((p: any) => {
           const isSaleValid = p.saleEndsAt ? new Date(p.saleEndsAt) > new Date() : true;
           const isDraft = p.status === "DRAFT";
 
@@ -274,64 +291,31 @@ export default function ProductSection({ storeId, products, categories, attribut
             <div key={p.id} className={`bg-slate-900/40 border ${isDraft ? 'border-orange-500/30' : 'border-slate-800'} rounded-[2.5rem] overflow-hidden group hover:border-blue-500/50 transition-all shadow-xl`}>
               <div className="aspect-square relative bg-slate-950 overflow-hidden">
                 <img src={p.images[0] || "/api/placeholder/400/400"} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${isDraft && 'opacity-30 grayscale'}`} />
-                
-                {/* Status Badges */}
-                <div className={`absolute top-6 right-6 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl ${isDraft ? 'bg-orange-600 text-white' : 'bg-emerald-600 text-white'}`}>
+                <div className={`absolute top-6 right-6 px-3 py-1 rounded-full text-[9px] font-black uppercase ${isDraft ? 'bg-orange-600 text-white' : 'bg-emerald-600 text-white'}`}>
                     {isDraft ? "Borrador" : "Publicado"}
                 </div>
-
-                {/* SKU Badge */}
-                {p.sku && (
-                  <div className="absolute bottom-6 left-6 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-[9px] font-black text-slate-300 uppercase italic">
-                    SKU: {p.sku}
-                  </div>
-                )}
-
-                {/* ETIQUETA DE OFERTA */}
-                {p.comparePrice && isSaleValid && (
-                    <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg animate-pulse">
-                      Oferta
-                    </div>
-                )}
+                {p.sku && <div className="absolute bottom-6 left-6 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-[9px] font-black text-slate-300 italic uppercase">SKU: {p.sku}</div>}
+                {p.comparePrice && isSaleValid && <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 rounded-full text-[10px] font-black uppercase shadow-lg animate-pulse">Oferta</div>}
               </div>
-
               <div className="p-8">
-                <h3 className="font-black text-xl tracking-tight mb-2 uppercase italic text-white truncate">{p.name}</h3>
-                
-                <div className="flex items-center gap-3 mb-6">
+                <h3 className="font-black text-xl text-white uppercase italic truncate">{p.name}</h3>
+                <div className="flex items-center gap-3 mt-4 mb-2">
                     <span className={`text-2xl font-black ${p.comparePrice && isSaleValid ? 'text-emerald-400' : 'text-blue-500'}`}>${p.price}</span>
                     {p.comparePrice && isSaleValid && <span className="text-sm text-slate-500 line-through font-bold">${p.comparePrice}</span>}
                 </div>
-
-                {p.saleEndsAt && isSaleValid && (
-                  <p className="text-[9px] font-bold uppercase tracking-widest mb-4 text-orange-500 flex items-center gap-1">
-                    <AlertCircle size={10} /> Expira: {new Date(p.saleEndsAt).toLocaleDateString()}
-                  </p>
-                )}
+                {p.saleEndsAt && isSaleValid && <p className="text-[9px] font-bold text-orange-500 uppercase flex items-center gap-1 mb-6"><AlertCircle size={10} /> Expira: {new Date(p.saleEndsAt).toLocaleDateString()}</p>}
                 
                 <div className="flex justify-between items-center pt-6 border-t border-slate-800/50">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Existencias</span>
-                      <span className="text-sm font-bold text-white">{p.stock} U.</span>
-                    </div>
+                    <div className="flex flex-col"><span className="text-[10px] font-black text-slate-500 uppercase">Existencias</span><span className="text-sm font-bold text-white">{p.stock} U.</span></div>
                     <div className="flex gap-2">
-                      <button className="p-3 bg-slate-800 rounded-xl hover:bg-red-500/20 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
-                      <button className="p-3 bg-slate-800 rounded-xl hover:bg-blue-600 transition-colors"><Box size={16} /></button>
+                      <button onClick={() => handleDelete(p.id)} className="p-3 bg-slate-800 rounded-xl hover:bg-red-500/20 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                      <button onClick={() => startEdit(p)} className="p-3 bg-slate-800 rounded-xl hover:bg-blue-600 transition-colors text-white"><Edit3 size={16} /></button>
                     </div>
                 </div>
               </div>
             </div>
           );
         })}
-
-        {(!products || products.length === 0) && (
-          <div className="col-span-full py-32 bg-slate-900/10 border-2 border-dashed border-slate-800/50 rounded-[4rem] text-center">
-            <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-               <ImageIcon size={32} className="text-slate-700" />
-            </div>
-            <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs italic">El catálogo está vacío</p>
-          </div>
-        )}
       </div>
     </div>
   );

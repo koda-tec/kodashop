@@ -1,5 +1,4 @@
-// apps/api/src/products/products.controller.ts
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete, Patch } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -17,5 +16,17 @@ export class ProductsController {
   @Get(':storeId')
   async findAll(@Param('storeId') storeId: string) {
     return this.productsService.findAllByStore(storeId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.productsService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() body: any) {
+    return this.productsService.update(id, body);
   }
 }
