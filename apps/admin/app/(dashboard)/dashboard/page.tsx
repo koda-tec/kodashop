@@ -19,6 +19,7 @@ export default function DashboardPage() {
   
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const STORE_BASE_URL = "https://kodashop-f61u.vercel.app/";
 
   // 🛡️ EFECTO: Verificar sesión y cargar tiendas
   useEffect(() => {
@@ -222,13 +223,15 @@ export default function DashboardPage() {
                       >
                         <Settings size={14} /> GESTIONAR
                       </Link>
-                      <a 
-                        href={`https://${store.subdomain}.kodashop.com`}
-                        target="_blank"
-                        className="flex items-center justify-center gap-2 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white p-3.5 rounded-xl text-[10px] font-black transition-all border border-blue-500/10"
-                      >
-                        <ExternalLink size={14} /> WEB
-                      </a>
+                        <a 
+                          href={`${STORE_BASE_URL}/?s=${store.subdomain}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white p-3.5 rounded-xl text-[10px] font-black transition-all border border-blue-500/10"
+                        >
+                          <ExternalLink size={14} /> WEB
+                        </a>
+
                     </div>
                   </motion.div>
                 ))}
