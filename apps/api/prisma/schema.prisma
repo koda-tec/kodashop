@@ -24,6 +24,10 @@ model Store {
   pixelId       String?   // Facebook Pixel ID
   capiToken     String?   // Facebook Conversion API Access Token
   testEventCode String?   // Código de prueba de eventos (TEST12345)
+  
+  metaVerification  String?   // Para el meta-tag de verificación
+  googleAnalyticsId String?   // ID de GA4 (G-XXXXXXXX)
+  customHeadScripts String?   // Scripts personalizados en el <head>
   // --- Branding & Config ---
   logo          String?
   primaryColor  String    @default("#2563eb")
