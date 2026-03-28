@@ -22,13 +22,13 @@ export default function LifestylePremium({ store }: any) {
 
       {/* 📢 BARRA DE ANUNCIO */}
       {store.announcement && (
-        <div style={{ backgroundColor: store.primaryColor }} className="text-white text-center py-2 text-[10px] font-black uppercase tracking-[0.3em] relative z-[110]">
+        <div style={{ backgroundColor: store.primaryColor }} className="text-white text-center py-2 text-[10px] font-black uppercase tracking-[0.3em] relative z-110">
           {store.announcement}
         </div>
       )}
 
       {/* 🏢 NAVBAR FLOTANTE GLASSMORPHISM */}
-      <nav className={`fixed left-0 right-0 z-[100] transition-all duration-500 px-6 ${scrolled ? 'top-0 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm' : 'top-10 py-6 bg-transparent'}`}>
+      <nav className={`fixed left-0 right-0 z-100ransition-all duration-500 px-6 ${scrolled ? 'top-0 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm' : 'top-10 py-6 bg-transparent'}`}>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo con manejo de contraste */}
           <div className="flex-1">
@@ -40,10 +40,10 @@ export default function LifestylePremium({ store }: any) {
           </div>
 
           {/* Menú Central */}
-          <div className={`hidden md:flex flex-[2] justify-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] ${!scrolled ? 'text-white/80' : 'text-black/60'}`}>
-            <a href="#productos" className="hover:text-[var(--primary)] transition-colors">Catálogo</a>
-            <a href="#beneficios" className="hover:text-[var(--primary)] transition-colors">Garantía</a>
-            <a href="#nosotros" className="hover:text-[var(--primary)] transition-colors">Nosotros</a>
+          <div className={`hidden md:flex flex-2 justify-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] ${!scrolled ? 'text-white/80' : 'text-black/60'}`}>
+            <a href="#productos" className="hover:text-(--primary) transition-colors">Catálogo</a>
+            <a href="#beneficios" className="hover:text-(--primary) transition-colors">Garantía</a>
+            <a href="#nosotros" className="hover:text-(--primary) transition-colors">Nosotros</a>
           </div>
 
           {/* Carrito e Iconos */}
@@ -63,7 +63,7 @@ export default function LifestylePremium({ store }: any) {
           {store.banners?.[0] ? (
             <img src={store.banners[0]} className="w-full h-full object-cover scale-105" alt="Hero" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-black" />
+            <div className="w-full h-full bg-linear-to-br from-zinc-800 to-black" />
           )}
           <div className="absolute inset-0 bg-black/40" />
         </div>
@@ -86,17 +86,17 @@ export default function LifestylePremium({ store }: any) {
       <section id="beneficios" className="py-24 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-[var(--primary)] border border-gray-100"><Truck size={24} /></div>
+            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-(--primary) border border-gray-100"><Truck size={24} /></div>
             <h3 className="font-black text-xs uppercase tracking-widest mb-3 text-zinc-900">Logística de Élite</h3>
             <p className="text-zinc-500 text-xs font-medium leading-relaxed uppercase">Envío prioritario a todo el país. Recibe en 48/72hs hábiles.</p>
           </div>
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-[var(--primary)] border border-gray-100"><ShieldCheck size={24} /></div>
+            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-(--primary) border border-gray-100"><ShieldCheck size={24} /></div>
             <h3 className="font-black text-xs uppercase tracking-widest mb-3 text-zinc-900">Compra Blindada</h3>
             <p className="text-zinc-500 text-xs font-medium leading-relaxed uppercase">Tus datos están protegidos bajo protocolos de seguridad internacional.</p>
           </div>
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-[var(--primary)] border border-gray-100"><Star size={24} /></div>
+            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-(--primary) border border-gray-100"><Star size={24} /></div>
             <h3 className="font-black text-xs uppercase tracking-widest mb-3 text-zinc-900">Garantía Real</h3>
             <p className="text-zinc-500 text-xs font-medium leading-relaxed uppercase">Satisfacción garantizada o te devolvemos tu dinero en 30 días.</p>
           </div>
@@ -128,7 +128,7 @@ export default function LifestylePremium({ store }: any) {
       {store.whatsapp && (
         <a 
           href={`https://wa.me/${store.whatsapp}`} target="_blank"
-          className="fixed bottom-8 right-8 z-[150] bg-[#25D366] p-5 rounded-[2.2rem] shadow-[0_20px_50px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-all flex items-center justify-center group"
+          className="fixed bottom-8 right-8 z-150 bg-[#25D366] p-5 rounded-[2.2rem] shadow-[0_20px_50px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-all flex items-center justify-center group"
         >
           <div className="absolute right-full mr-4 bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-xl">
              ¡Hablemos por WhatsApp!
@@ -141,15 +141,15 @@ export default function LifestylePremium({ store }: any) {
       <footer className="bg-zinc-950 text-white pt-32 pb-16 px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-20">
            <div className="col-span-1 md:col-span-2 space-y-8">
-              <h2 className="text-3xl font-black italic tracking-tighter uppercase underline decoration-[var(--primary)] decoration-4 underline-offset-8">{store.name}</h2>
+              <h2 className="text-3xl font-black italic tracking-tighter uppercase underline decoration-(--primary) decoration-4 underline-offset-8">{store.name}</h2>
               <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-sm">Elevamos tu experiencia de compra con una curaduría de clase mundial y soporte dedicado.</p>
            </div>
            <div className="space-y-6">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Links Útiles</h4>
               <ul className="space-y-4 text-xs font-bold uppercase italic">
-                 <li className="hover:text-[var(--primary)] cursor-pointer">Seguir mi pedido</li>
-                 <li className="hover:text-[var(--primary)] cursor-pointer">Políticas de reembolso</li>
-                 <li className="hover:text-[var(--primary)] cursor-pointer">Términos legales</li>
+                 <li className="hover:text-(--primary)or-pointer">Seguir mi pedido</li>
+                 <li className="hover:text-(--primary) cursor-pointer">Políticas de reembolso</li>
+                 <li className="hover:text-(--primary) cursor-pointer">Términos legales</li>
               </ul>
            </div>
            <div className="space-y-6">
