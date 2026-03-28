@@ -49,6 +49,9 @@ export class StoresService {
         heroSubtitle: data.heroSubtitle,
         whatsapp: data.whatsapp,
         banners: data.banners, // Prisma maneja el array de strings automáticamente
+        pixelId: data.pixelId,
+        capiToken: data.capiToken,
+        testEventCode: data.testEventCode,
       },
     });
   }

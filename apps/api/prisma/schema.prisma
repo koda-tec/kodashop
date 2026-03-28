@@ -21,6 +21,9 @@ model Store {
   name          String
   subdomain     String    @unique
   ownerEmail    String
+  pixelId       String?   // Facebook Pixel ID
+  capiToken     String?   // Facebook Conversion API Access Token
+  testEventCode String?   // Código de prueba de eventos (TEST12345)
   // --- Branding & Config ---
   logo          String?
   primaryColor  String    @default("#2563eb")
