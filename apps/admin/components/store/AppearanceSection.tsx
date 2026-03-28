@@ -171,6 +171,7 @@ export default function AppearanceSection({ storeId }: { storeId: string }) {
           <div className="grid grid-cols-1 gap-6">
              <TemplateItem id="default" name="Glow Pro" desc="E-commerce moderno y limpio." active={form.templateId === "default"} onClick={() => setForm({...form, templateId: "default"})} />
              <TemplateItem id="dark_minimal" name="Urban Dark" desc="Diseño agresivo para nichos tech." active={form.templateId === "dark_minimal"} onClick={() => setForm({...form, templateId: "dark_minimal"})} />
+             <TemplateItem id="premium_lifestyle" name="LifestylePremium" desc="Diseño inspirado en apple" active={form.templateId === "premium_lifestyle"} onClick={() => setForm({...form, templateId: "premium_lifestyle"})} />
           </div>
         </div>
 
